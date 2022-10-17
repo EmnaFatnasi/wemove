@@ -13,25 +13,7 @@ class ActivitiesScreen extends StatefulWidget {
 class _ActivitiesScreenState extends State<ActivitiesScreen>
     with TickerProviderStateMixin {
   late TabController _tabcontroller;
-  List<ActivitiesCard>? _activitiesByType;
   bool isRequested = false;
-
-  List<ActivitiesCard> getActivitiesByType(
-      List<dynamic> listActivities, String type) {
-    List<ActivitiesCard> activities = [];
-
-    listActivities.forEach((element1) {
-      element1.activityTypes!.forEach((element) {
-        if (element.label!.contains(type)) {
-          activities.add(ActivitiesCard(
-              image: element1.image1,
-              name: element1.name,
-              description: element1.description));
-        }
-      });
-    });
-    return activities;
-  }
 
   getActivities() {
     setState(() {
@@ -39,6 +21,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
     });
 
     Provider.of<ActivitiesProvider>(context, listen: false).getAllActivities();
+  }
+
+  getActivitiesByType(String type) {
+    Provider.of<ActivitiesProvider>(context, listen: false)
+        .getActivitiesByType(type);
   }
 
   @override
@@ -53,7 +40,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
                       child: Text("Load Data"),
                       textColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          side: BorderSide(
+                          side: const BorderSide(
                               color: Colors.white,
                               width: 1,
                               style: BorderStyle.solid),
@@ -73,20 +60,17 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
                           ),
                         );
                       }
-                      final activities = value.activities;
+
                       final activitiesTypes = value.activitiesTypes;
-
                       // State 3 if the response is 200 OK and list not empty
-
                       if (value.activities.isNotEmpty) {
                         _tabcontroller = TabController(
                             length: activitiesTypes.length, vsync: this);
-                        _activitiesByType =
-                            getActivitiesByType(activities, activitiesTypes[0]);
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            SizedBox(height: 50),
+                            const SizedBox(height: 50),
                             // Custom TabBar
                             Container(
                               height: 100,
@@ -94,34 +78,39 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
                                   controller: _tabcontroller,
                                   indicatorWeight: 0.1,
                                   isScrollable: true,
-                                  tabs: List.generate(
-                                      activitiesTypes.length,
-                                      (index) => Card(
-                                            color: Color(0x00000000),
-                                            shape: RoundedRectangleBorder(
-                                              side: const BorderSide(
-                                                color: Colors.white,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(20.0),
-                                            ),
-                                            child: Container(
-                                              padding: EdgeInsets.all(16),
-                                              child: Text(
-                                                activitiesTypes[index],
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                          ))),
+                                  onTap: ((value) {
+                                    getActivitiesByType(activitiesTypes[value]);
+                                  }),
+                                  tabs: List.generate(activitiesTypes.length,
+                                      (index) {
+                                    getActivitiesByType(activitiesTypes[index]);
+
+                                    return Card(
+                                      color: const Color(0x00000000),
+                                      shape: RoundedRectangleBorder(
+                                        side: const BorderSide(
+                                          color: Colors.white,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Text(
+                                          activitiesTypes[index],
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    );
+                                  })),
                             ),
                             Expanded(
                                 child: Container(
                               child: ListView.builder(
-                                  itemCount: _activitiesByType!.length,
+                                  itemCount: value.activitiesByType.length,
                                   itemBuilder: (context, index) {
                                     return Card(
                                       clipBehavior: Clip.antiAlias,
@@ -149,7 +138,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
                                                   MainAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  _activitiesByType![index]
+                                                  value.activitiesByType[index]
                                                       .name!,
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -161,7 +150,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
                                                   height: 15,
                                                 ),
                                                 Text(
-                                                  _activitiesByType![index]
+                                                  value.activitiesByType[index]
                                                       .description!,
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -195,7 +184,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen>
                                     child: const Text("Load Data"),
                                     textColor: Colors.white,
                                     shape: RoundedRectangleBorder(
-                                        side: BorderSide(
+                                        side: const BorderSide(
                                             color: Colors.white,
                                             width: 1,
                                             style: BorderStyle.solid),

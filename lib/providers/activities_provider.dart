@@ -5,6 +5,7 @@ import '../services/activities_service.dart';
 class ActivitiesProvider extends ChangeNotifier {
   final _service = ActivitiesService();
   bool isLoading = false;
+  bool isRequested = false;
   List<dynamic> _activitiesList = [];
   List<dynamic> get activities => _activitiesList;
   List<dynamic> _typesList = [];
@@ -15,6 +16,8 @@ class ActivitiesProvider extends ChangeNotifier {
   List<ActivitiesCard> get activitiesByType => _activitiesByTypeList;
 
   Future<void> getAllActivities() async {
+    isRequested = true;
+    notifyListeners();
     isLoading = true;
     notifyListeners();
     final response = await _service.getAll();
